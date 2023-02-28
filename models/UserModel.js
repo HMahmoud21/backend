@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const db = require('../config/Database.js');
+/*const { DataTypes } = require('sequelize');
+const db = require("../config/Database")
 
 const Users = db.define('Users', {
     uuid: {
@@ -28,4 +28,4 @@ const Users = db.define('Users', {
     }
 });
 
-module.exports = Users;
+module.exports = Users;*/

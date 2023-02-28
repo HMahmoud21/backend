@@ -1,40 +1,58 @@
-const Users = require("../models/UserModel.js");
-const argon2= require("argon2");
+const user =require( "../models/UserModel.js");
+const bcrypt=require("bcrypt");
+const db =require("../config/Database");
 
-module.exports. Login = async (req, res) =>{
-    const user = await User.findOne({
-        where: {
-            email: req.body.email
-        }
-    });
-    if(!user) return res.status(404).json({msg: "Utilisateur non trouvé"});
-    const match = await argon2.verify(user.password, req.body.password);
-    if(!match) return res.status(400).json({msg: "Wrong Password"});
-    req.session.userId = user.uuid;
-    const uuid = user.uuid;
-    const name = user.name;
-    const email = user.email;
-    const role = user.role;
-    res.status(200).json({uuid, name, email, role});
-}
+const saltRounds = 10;
 
-module.exports. Me = async (req, res) =>{
-    if(!req.session.userId){
-        return res.status(401).json({msg: "Veuillez vous connecter à votre compte !"});
+
+module.exports.Login=async(req,res)=>{
+    const email = req.body.email;console.log(email)
+  const password = req.body.password;console.log(password)
+
+  db.query(
+    "SELECT * FROM users WHERE email = ? , password=?; ",
+    email,password,
+    (err, result) => {
+      if (err) {
+        res.send({ err: err });
+      }
+
+      if (result.length > 0) {
+        bcrypt.compare(password, result[0].password, (error, response) => {
+          if (response) {
+            req.session.user = result;
+            console.log(req.session.user);
+            res.send(result);
+          } else {
+            res.send({ message: "succees" });
+          }
+        });
+      } else {
+        res.send({ message: "User doesn't exist" });
+      }
     }
-    const user = await User.findOne({
-        attributes:['uuid','name','email','role'],
-        where: {
-            uuid: req.session.userId
+  );
+};
+module.exports.registrer=async(req,res)=>{
+    const email = req.body.email;console.log(email)
+    const name = req.body.name;console.log(name)
+    const password = req.body.password;console.log(password)
+    bcrypt.hash(password, saltRounds, (err, hash) => {
+      if (err) {
+        console.log(err);
+        
+      }})
+  
+    db.query("INSERT INTO users (email, name, password) VALUES (?, ?, ?)", [email, name, password], 
+        (err, result) => {
+            if(result){
+              console.log("err");
+                res.send(result);
+            }else{
+              console.log("bien");
+                res.send({message: "succés"})
+            }
         }
-    });
-    if(!user) return res.status(404).json({msg: "Utilisateur non trouvé"});
-    res.status(200).json(user);
-}
-
-module.exports. logOut = (req, res) =>{
-    req.session.destroy((err)=>{
-        if(err) return res.status(400).json({msg: "Impossible de se déconnecter"});
-        res.status(200).json({msg: "Vous vous êtes déconnecté"});
-    });
-}
+    )
+  }
+  
