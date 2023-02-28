@@ -44,7 +44,7 @@ app.post('/register', (req, res) => {
       console.log(err);
       
     }})
-    /db.query(
+    db.query(
       "SELECT * FROM users WHERE email = ?;",
       email,(err, result) => {
         if (err) {
@@ -55,15 +55,15 @@ app.post('/register', (req, res) => {
               res.send({ message: "alredy exist" }); 
         } 
         db.query("INSERT INTO users (email, name, password) VALUES (?, ?, ?)", [email, name, password], 
-          (err, result) => {
+         (err, result) => {
           if(result){
             console.log("err");
               res.send(result);
           }else{
-            console.log("problem");
-              res.send({message: ""})
-          }}
-      )
+           console.log("problem");
+              res.send({message: "succées "})
+       }}
+     )
   
 })
 });
